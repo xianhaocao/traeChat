@@ -4,7 +4,6 @@ import { getModelConfig } from '@/lib/modelConfigs';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Deepseek } from '@deepseek-ai/deepseek-sdk';
 
 // 处理POST请求
 export async function POST(request: NextRequest) {
@@ -135,12 +134,15 @@ async function handleAnthropicChat(request: ChatRequest) {
     });
 
     // 调用Anthropic API
+    // 将系统消息分离出来，作为单独的system参数传递
+    const userAssistantMessages = messages
+      .filter(msg => msg.role === 'user' || msg.role === 'assistant');
+    const systemContent = messages.find(msg => msg.role === 'system')?.content;
+
     const response = await anthropic.messages.create({
       model,
-      messages: messages.map(msg => ({
-        role: msg.role,
-        content: msg.content,
-      })),
+      messages: userAssistantMessages,
+      system: systemContent,
       temperature,
       max_tokens: maxTokens || 4000,
       stream: true,
@@ -154,7 +156,12 @@ async function handleAnthropicChat(request: ChatRequest) {
         try {
           for await (const chunk of response) {
             if (chunk.type === 'content_block_delta') {
-              const content = chunk.delta.text || '';
+              let content = '';
+              if ('text' in chunk.delta) {
+                content = chunk.delta.text || '';
+              } else if ('json' in chunk.delta) {
+                content = JSON.stringify(chunk.delta.json) || '';
+              }
               if (content) {
                 controller.enqueue(encoder.encode(content));
               }
@@ -196,10 +203,14 @@ async function handleDeepSeekChat(request: ChatRequest) {
   }
 
   try {
-    const deepseek = new Deepseek(deepseekApiKey);
+    // 使用OpenAI SDK调用DeepSeek API（兼容OpenAI格式）
+    const openai = new OpenAI({
+      apiKey: deepseekApiKey,
+      baseURL: 'https://api.deepseek.com/v1',
+    });
 
     // 调用DeepSeek API
-    const response = await deepseek.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model,
       messages: messages.map(msg => ({
         role: msg.role,

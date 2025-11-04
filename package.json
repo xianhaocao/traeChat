@@ -27,8 +27,8 @@
     "react-textarea-autosize": "8.5.6",
     "server-only": "0.0.1",
     "openai": "4.78.1",
-    "@anthropic-ai/sdk": "0.35.1",
-    "@deepseek-ai/deepseek-sdk": "0.0.7",
+    "@anthropic-ai/sdk": "0.68.0",
+
     "@google/generative-ai": "0.21.0"
   },
   "devDependencies": {

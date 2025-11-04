@@ -2,12 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    serverActions: true,
-    streamingComponents: true,
+    serverActions: {
+      bodySizeLimit: '2mb',
+      allowReadOnlyServerComponents: true,
+    },
   },
   images: {
     domains: ['images.unsplash.com', 'ui-avatars.com'],
   },
 }
 
-module.exports = nextConfig
+export default nextConfig
