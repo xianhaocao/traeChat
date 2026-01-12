@@ -7,9 +7,16 @@ const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM
 export const generateId = (): string => nanoid();
 
 // 格式化日期
-export const formatDate = (date: Date): string => {
+export const formatDate = (date: Date | string): string => {
   const now = new Date();
-  const diff = now.getTime() - date.getTime();
+  const targetDate = typeof date === 'string' ? new Date(date) : date;
+  
+  // 检查日期是否有效
+  if (isNaN(targetDate.getTime())) {
+    return '无效日期';
+  }
+  
+  const diff = now.getTime() - targetDate.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
@@ -18,7 +25,7 @@ export const formatDate = (date: Date): string => {
   if (minutes < 60) return `${minutes}分钟前`;
   if (hours < 24) return `${hours}小时前`;
   if (days < 7) return `${days}天前`;
-  return date.toLocaleDateString('zh-CN', {
+  return targetDate.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
