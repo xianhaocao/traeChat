@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PlusCircle, MessageSquare, Settings, Trash2, Edit } from 'lucide-react';
+import { PlusCircle, MessageSquare, Settings, Trash2, Edit, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';

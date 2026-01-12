@@ -1,4 +1,19 @@
-import { ModelConfig, ModelType } from '@/types';
+// 定义所有支持的AI模型配置
+export enum ProviderType {
+  OpenAI = 'openai',
+  Anthropic = 'anthropic',
+  DeepSeek = 'deepseek',
+  Google = 'google',
+}
+
+export interface ModelConfig {
+  name: string;
+  displayName: string;
+  provider: ProviderType;
+  icon: string;
+}
+
+export type ModelType = 'gpt-4o' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'deepseek-chat' | 'gemini-pro';
 
 // 定义所有支持的AI模型配置
 export const modelConfigs: ModelConfig[] = [
@@ -6,13 +21,13 @@ export const modelConfigs: ModelConfig[] = [
   {
     name: 'gpt-4o' as ModelType,
     displayName: 'GPT-4o',
-    provider: 'openai',
+    provider: ProviderType.OpenAI,
     icon: '🤖',
   },
   {
     name: 'gpt-3.5-turbo' as ModelType,
     displayName: 'GPT-3.5 Turbo',
-    provider: 'openai',
+    provider: ProviderType.OpenAI,
     icon: '🤖',
   },
   
@@ -20,13 +35,13 @@ export const modelConfigs: ModelConfig[] = [
   {
     name: 'claude-3-opus' as ModelType,
     displayName: 'Claude 3 Opus',
-    provider: 'anthropic',
+    provider: ProviderType.Anthropic,
     icon: '🧠',
   },
   {
     name: 'claude-3-sonnet' as ModelType,
     displayName: 'Claude 3 Sonnet',
-    provider: 'anthropic',
+    provider: ProviderType.Anthropic,
     icon: '🧠',
   },
   
@@ -34,7 +49,7 @@ export const modelConfigs: ModelConfig[] = [
   {
     name: 'deepseek-chat' as ModelType,
     displayName: 'DeepSeek Chat',
-    provider: 'deepseek',
+    provider: ProviderType.DeepSeek,
     icon: '🔍',
   },
   
@@ -42,7 +57,7 @@ export const modelConfigs: ModelConfig[] = [
   {
     name: 'gemini-pro' as ModelType,
     displayName: 'Gemini Pro',
-    provider: 'google',
+    provider: ProviderType.Google,
     icon: '✨',
   },
 ];
@@ -53,7 +68,7 @@ export const getModelConfig = (modelName: string): ModelConfig | undefined => {
 };
 
 // 根据提供商获取模型列表
-export const getModelsByProvider = (provider: string): ModelConfig[] => {
+export const getModelsByProvider = (provider: string | ProviderType): ModelConfig[] => {
   return modelConfigs.filter(model => model.provider === provider);
 };
 
@@ -63,4 +78,15 @@ export const isModelRequiringApiKey = (modelName: string): boolean => {
   if (!model) return true;
   // 目前所有模型都需要API密钥
   return true;
+};
+
+// 获取所有模型
+export const getAllModels = (): ModelConfig[] => {
+  return modelConfigs;
+};
+
+// 获取提供商图标
+export const getProviderIcon = (provider: string | ProviderType): string => {
+  const model = modelConfigs.find(m => m.provider === provider);
+  return model ? model.icon : '🤖';
 };

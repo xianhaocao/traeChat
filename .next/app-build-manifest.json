@@ -1,0 +1,10 @@
+{
+  "pages": {
+    "/api/chat/route": [
+      "static/chunks/webpack-b8929893121c31bf.js",
+      "static/chunks/4bd1b696-92810b4b4ece63ad.js",
+      "static/chunks/main-app-a68a968ebb9f33db.js",
+      "static/chunks/app/api/chat/route-2ad2e792b48d4f19.js"
+    ]
+  }
+}

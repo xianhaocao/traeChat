@@ -1,5 +1,5 @@
 import { customAlphabet } from 'nanoid';
-import { codeToHtml } from 'highlight.js';
+import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
 
 // 生成唯一ID
@@ -39,8 +39,8 @@ export const processMarkdownCode = (markdown: string): string => {
     const content = contentLines.join('\n').trim();
     
     try {
-      const highlighted = codeToHtml(content, { language: language || 'plaintext' });
-      return `<div class="code-block">${highlighted}</div>`;
+      const result = hljs.highlight(content, { language: language || 'plaintext' });
+      return `<div class="code-block"><pre><code class="language-${language || 'plaintext'}">${result.value}</code></pre></div>`;
     } catch (error) {
       return `<pre><code>${content}</code></pre>`;
     }

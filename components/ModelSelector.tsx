@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -41,8 +41,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange }) => {
 
   // 获取提供商图标
   const getProviderIconComponent = (provider: ProviderType) => {
-    const Icon = getProviderIcon(provider);
-    return Icon ? <Icon size={16} /> : null;
+    const icon = getProviderIcon(provider);
+    return <span className="text-lg">{icon}</span>;
   };
 
   return (
