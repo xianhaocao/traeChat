@@ -8,10 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#3b82f6',
-        secondary: '#8b5cf6',
+        primary: 'var(--primary)',
+        'primary-light': 'var(--primary-light)',
+        'primary-dark': 'var(--primary-dark)',
+        secondary: 'var(--secondary)',
+        accent: 'var(--accent)',
+        success: 'var(--success)',
+        warning: 'var(--warning)',
+        error: 'var(--error)',
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        card: 'var(--card)',
+        'card-hover': 'var(--card-hover)',
+        border: 'var(--border)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

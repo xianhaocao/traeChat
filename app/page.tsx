@@ -130,28 +130,28 @@ const Page: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-background">
       {/* 侧边栏 */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* 主聊天区域 */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* 顶部导航栏 */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between shadow">
+          <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden text-foreground hover:bg-primary-light"
               onClick={() => setSidebarOpen(true)}
             >
-              <Menu size={20} />
+              <Menu size={22} />
             </Button>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {currentConversation?.title || 'TraeChat'}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {/* 可以在这里添加更多操作按钮，比如清空对话、分享等 */}
           </div>
         </header>

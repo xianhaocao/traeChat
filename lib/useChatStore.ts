@@ -11,6 +11,7 @@ interface ChatStore {
   createConversation: (model?: ModelType) => string;
   switchConversation: (id: string) => void;
   deleteConversation: (id: string) => void;
+  clearAllConversations: () => void;
   addMessage: (conversationId: string, message: Message) => void;
   updateMessage: (conversationId: string, messageId: string, content: string) => void;
   setMessageStreaming: (conversationId: string, messageId: string, isStreaming: boolean) => void;
@@ -223,13 +224,20 @@ export const useChatStore = create<ChatStore>()(
         const conversation = get().getCurrentConversation();
         return conversation?.messages || [];
       },
+
+      clearAllConversations: () => {
+        set(() => ({
+          conversations: [],
+          currentConversationId: null,
+        }));
+      },
     }),
     {
       name: 'trae-chat-storage',
       storage: createJSONStorage(() => localStorage),
       version: 1,
-      migrate: (persistedState, version) => {
-        if (version === 0) {
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0 && persistedState) {
           // 版本迁移逻辑
           return {
             ...persistedState,

@@ -136,7 +136,8 @@ async function handleAnthropicChat(request: ChatRequest) {
     // 调用Anthropic API
     // 将系统消息分离出来，作为单独的system参数传递
     const userAssistantMessages = messages
-      .filter(msg => msg.role === 'user' || msg.role === 'assistant');
+      .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+      .map(msg => ({ role: msg.role as 'user' | 'assistant', content: msg.content }));
     const systemContent = messages.find(msg => msg.role === 'system')?.content;
 
     const response = await anthropic.messages.create({

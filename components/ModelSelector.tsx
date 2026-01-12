@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { Search, Filter, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useChatStore } from '@/lib/useChatStore';
 import { getAllModels, getProviderIcon, ProviderType } from '@/lib/modelConfigs';
+import { ModelType } from '@/types';
 
 interface ModelSelectorProps {
   onModelChange?: (model: string) => void;
@@ -33,9 +33,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange }) => {
 
   // 切换模型
   const handleModelChange = (modelName: string) => {
-    updateConfig({ defaultModel: modelName });
+    updateConfig({ defaultModel: modelName as ModelType });
     if (onModelChange) {
-      onModelChange(modelName);
+      onModelChange(modelName as ModelType);
     }
   };
 
@@ -87,18 +87,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange }) => {
         <TooltipProvider>
           {filteredModels.length > 0 ? (
             filteredModels.map(model => (
-              <motion.div
+              <div
                 key={model.name}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
                 className={`cursor-pointer p-2 rounded-lg transition-colors flex items-center gap-2 ${model.name === config.defaultModel ? 'bg-blue-100 dark:bg-blue-900' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                 onClick={() => handleModelChange(model.name)}
               >
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
                       {getProviderIconComponent(model.provider)}
                     </div>
@@ -110,27 +105,24 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange }) => {
 
                 <div className="flex-1 min-w-0">
                   <Tooltip>
-                    <TooltipTrigger asChild>
+                    <TooltipTrigger>
                       <h3 className="text-sm font-medium truncate">{model.displayName}</h3>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{model.name}</p>
                     </TooltipContent>
                   </Tooltip>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{model.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{model.name}</p>
                 </div>
 
                 {model.name === config.defaultModel && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  <div
                     className="flex-shrink-0 ml-2"
                   >
                     <CheckCircle size={16} className="text-blue-500" />
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
             ))
           ) : (
             <div className="text-center py-4 text-gray-500 dark:text-gray-400">

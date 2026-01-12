@@ -51,14 +51,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   // 渲染对话项
   const renderConversationItem = (conversation: Conversation) => (
-    <motion.div
+    <div
       key={conversation.id}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors ${conversation.id === currentConversationId ? 'bg-blue-100 dark:bg-blue-900' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+      className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors ${conversation.id === currentConversationId ? 'bg-primary-light dark:bg-primary-dark/30 border border-primary/30' : 'bg-card hover:bg-card-hover border border-transparent hover:border-primary/20'}`}
       onClick={() => {
         switchConversation(conversation.id);
         onClose();
@@ -105,44 +100,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       </div>
 
       <div className="mt-2 flex items-center gap-2">
-        <span className="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+        <span className="inline-block w-2 h-2 rounded-full bg-primary"></span>
         <span className="text-xs text-gray-500 dark:text-gray-400">
           {conversation.model.split('-')[0]}
         </span>
       </div>
-    </motion.div>
+    </div>
   );
 
   return (
     <>
       {/* 移动端遮罩 */}
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={onClose}
         />
       )}
 
       {/* 侧边栏 */}
-      <motion.div
-        initial={{ x: -300, opacity: 0 }}
-        animate={{ x: isOpen ? 0 : -300, opacity: isOpen ? 1 : 0 }}
-        exit={{ x: -300, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed top-0 left-0 z-50 w-80 h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-xl md:static md:w-72"
+      <div
+        className={`fixed top-0 left-0 z-50 w-80 h-full bg-card border-r border-border shadow-xl md:static md:w-72 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="h-full flex flex-col">
           {/* 顶部导航 */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">TraeChat</h1>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">TraeChat</h1>
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="md:hidden text-foreground hover:bg-primary-light"
                 onClick={onClose}
               >
                 <X size={20} />
@@ -151,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             <Button
               variant="default"
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary-dark"
               onClick={handleNewConversation}
               leftIcon={<PlusCircle size={18} />}
             >
@@ -210,7 +198,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* 修复移动端关闭按钮的导入 */}
       <style jsx>{`

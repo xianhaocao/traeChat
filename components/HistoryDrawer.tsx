@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { MessageSquare, Trash2, X } from 'lucide-react';
 import Button from '@/components/ui/button';
 import { Virtuoso } from 'react-virtuoso';
@@ -33,22 +33,14 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose }) => {
       {isOpen && (
         <>
           {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-200 opacity-100"
             onClick={onClose}
           />
 
           {/* Drawer */}
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-0 top-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
+          <div
+            className="fixed left-0 top-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col translate-x-0 transition-transform duration-300"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
@@ -74,14 +66,9 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose }) => {
               ) : (
                 <Virtuoso
                   data={conversations}
-                  itemContent={(index, conversation) => (
-                    <motion.div
+                  itemContent={(index: number, conversation: Conversation) => (
+                    <div
                       key={conversation.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: 0.05 * index }}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
                       className={`cursor-pointer p-3 rounded-lg transition-colors ${currentConversationId === conversation.id ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                       onClick={() => {
                         switchConversation(conversation.id);
@@ -109,7 +96,7 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose }) => {
                         <span>{formatDate(conversation.updatedAt)}</span>
                         <span>{getWordCount(conversation.messages)} 字</span>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
                   style={{ height: '100%' }}
                 />
@@ -130,7 +117,7 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose }) => {
                 </Button>
               </div>
             )}
-          </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
