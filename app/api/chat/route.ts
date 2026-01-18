@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const { messages, model, temperature, maxTokens, apiKey } = body;
 
     // 验证参数
-    if (!messages || !model || temperature === undefined) {
+    if (!messages || !model) {
       return NextResponse.json(
         { error: '缺少必要参数' },
         { status: 400 }
@@ -22,10 +22,38 @@ export async function POST(request: NextRequest) {
     // 获取模型配置
     const modelConfig = getModelConfig(model);
     if (!modelConfig) {
-      return NextResponse.json(
-        { error: '不支持的模型' },
-        { status: 400 }
-      );
+      // 没有模型配置时返回写死的内容
+      const fixedResponse = `你好！我是一个默认的聊天机器人。你刚才问的是："${messages[messages.length - 1].content}"。
+
+这是我的默认回复内容：
+- 我可以回答各种问题
+- 我支持多轮对话
+- 我会尽力帮助你解决问题
+
+如果你有其他问题，请随时提问！`;
+
+      // 创建流式响应
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          
+          // 模拟流式输出
+          const words = fixedResponse.split(' ');
+          for (const word of words) {
+            controller.enqueue(encoder.encode(word + ' '));
+            await new Promise(resolve => setTimeout(resolve, 50)); // 模拟延迟
+          }
+          
+          controller.close();
+        }
+      });
+
+      return new NextResponse(stream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Transfer-Encoding': 'chunked'
+        }
+      });
     }
 
     // 根据不同提供商处理请求

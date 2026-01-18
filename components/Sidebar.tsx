@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PlusCircle, MessageSquare, Settings, Trash2, Edit, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,12 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [renameConversationId, setRenameConversationId] = useState<string | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConversationId, setDeleteConversationId] = useState<string | null>(null);
+
   const {
     conversations,
     currentConversationId,
@@ -31,22 +37,51 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   // 处理新对话
   const handleNewConversation = () => {
     createConversation(config.defaultModel);
-    onClose();
   };
 
   // 处理删除对话
   const handleDeleteConversation = (id: string) => {
-    if (confirm('确定要删除这个对话吗？')) {
-      deleteConversation(id);
+    setDeleteConversationId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  // 确认删除
+  const handleConfirmDelete = () => {
+    if (deleteConversationId) {
+      deleteConversation(deleteConversationId);
     }
+    setIsDeleteModalOpen(false);
+    setDeleteConversationId(null);
+  };
+
+  // 取消删除
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteConversationId(null);
   };
 
   // 处理重命名对话
   const handleRenameConversation = (id: string, currentTitle: string) => {
-    const newTitle = prompt('请输入新的对话标题:', currentTitle);
-    if (newTitle && newTitle.trim() !== currentTitle.trim()) {
-      renameConversation(id, newTitle.trim());
+    setRenameConversationId(id);
+    setNewTitle(currentTitle);
+    setIsRenameModalOpen(true);
+  };
+
+  // 确认重命名
+  const handleConfirmRename = () => {
+    if (renameConversationId && newTitle.trim()) {
+      renameConversation(renameConversationId, newTitle.trim());
     }
+    setIsRenameModalOpen(false);
+    setRenameConversationId(null);
+    setNewTitle('');
+  };
+
+  // 取消重命名
+  const handleCancelRename = () => {
+    setIsRenameModalOpen(false);
+    setRenameConversationId(null);
+    setNewTitle('');
   };
 
   // 渲染对话项
@@ -56,7 +91,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors ${conversation.id === currentConversationId ? 'bg-primary-light dark:bg-primary-dark/30 border border-primary/30' : 'bg-card hover:bg-card-hover border border-transparent hover:border-primary/20'}`}
       onClick={() => {
         switchConversation(conversation.id);
-        onClose();
       }}
     >
       <div className="flex items-start justify-between">
@@ -206,6 +240,65 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           opacity: 1;
         }
       `}</style>
+
+      {/* 重命名对话框 */}
+      {isRenameModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-card rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-4">重命名对话</h3>
+            <input
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground"
+              placeholder="请输入新的对话标题"
+              autoFocus
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                variant="ghost"
+                onClick={handleCancelRename}
+              >
+                取消
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleConfirmRename}
+                disabled={!newTitle.trim()}
+              >
+                确定
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 删除确认对话框 */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-card rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-4">删除对话</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              确定要删除这个对话吗？此操作无法撤销。
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="ghost"
+                onClick={handleCancelDelete}
+              >
+                取消
+              </Button>
+              <Button
+                variant="default"
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={handleConfirmDelete}
+              >
+                删除
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

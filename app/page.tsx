@@ -11,14 +11,19 @@ import { useChatStore } from '@/lib/useChatStore';
 import { Message, Conversation } from '@/types';
 
 const Page: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const { getCurrentConversation, addMessage, updateMessage, setMessageStreaming, clearConversation, createConversation } = useChatStore();
+  const { getCurrentConversation, getCurrentMessages, addMessage, updateMessage, setMessageStreaming, clearConversation, createConversation, conversations, currentConversationId } = useChatStore();
   const [clientConversation, setClientConversation] = useState<Conversation | undefined>(undefined);
+  const [messages, setMessages] = useState<Message[]>([]);
   
   React.useEffect(() => {
     setClientConversation(getCurrentConversation());
-  }, [getCurrentConversation]);
+  }, [getCurrentConversation, currentConversationId, conversations]);
+
+  React.useEffect(() => {
+    setMessages(getCurrentMessages());
+  }, [getCurrentMessages, currentConversationId, conversations]);
 
   const handleSendMessage = async (content: string) => {
     if (!clientConversation) {
@@ -34,6 +39,7 @@ const Page: React.FC = () => {
         isStreaming: false,
       };
       addMessage(newConversationId, userMessage);
+      setMessages([...messages, userMessage]);
     } else {
       const userMessage: Message = {
         id: Date.now().toString(),
@@ -43,10 +49,13 @@ const Page: React.FC = () => {
         isStreaming: false,
       };
       addMessage(clientConversation.id, userMessage);
+      setMessages([...messages, userMessage]);
     }
 
     const updatedConversation = getCurrentConversation();
     if (!updatedConversation) return;
+
+    setClientConversation(updatedConversation);
 
     setIsLoading(true);
 
@@ -78,29 +87,21 @@ const Page: React.FC = () => {
           isStreaming: true,
         };
         addMessage(updatedConversation.id, assistantMessage);
+        setMessages([...messages, assistantMessage]);
 
         while (!done) {
           const { value, done: doneReading } = await reader.read();
           done = doneReading;
-          const chunk = decoder.decode(value);
-
-          const lines = chunk.split('\n');
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(5));
-                if (data.type === 'text') {
-                  accumulatedContent += data.content;
-                  updateMessage(updatedConversation.id, assistantMessage.id, accumulatedContent);
-                }
-              } catch (e) {
-                // Ignore parse errors
-              }
-            }
+          if (value) {
+            const chunk = decoder.decode(value);
+            accumulatedContent += chunk;
+            updateMessage(updatedConversation.id, assistantMessage.id, accumulatedContent);
+            setMessages(messages.map(m => m.id === assistantMessage.id ? { ...m, content: accumulatedContent } : m));
           }
         }
 
         setMessageStreaming(updatedConversation.id, assistantMessage.id, false);
+        setMessages(messages.map(m => m.id === assistantMessage.id ? { ...m, isStreaming: false } : m));
       } else {
         const data = await response.json();
         const assistantMessage: Message = {
@@ -111,6 +112,7 @@ const Page: React.FC = () => {
           isStreaming: false,
         };
         addMessage(updatedConversation.id, assistantMessage);
+        setMessages([...messages, assistantMessage]);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -122,6 +124,7 @@ const Page: React.FC = () => {
         isStreaming: false,
       };
       addMessage(updatedConversation.id, errorMessage);
+      setMessages([...messages, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -130,6 +133,10 @@ const Page: React.FC = () => {
   const handleClearChat = () => {
     if (clientConversation) {
       clearConversation(clientConversation.id);
+      // 更新clientConversation状态
+      setClientConversation(getCurrentConversation());
+      // 更新messages状态
+      setMessages([]);
     }
   };
 
@@ -161,14 +168,14 @@ const Page: React.FC = () => {
         </header>
 
         {/* 聊天窗口 */}
-        <ChatWindow messages={clientConversation?.messages || []} />
+        <ChatWindow messages={messages} isLoading={isLoading} />
 
         {/* 输入框 */}
         <ChatInput
           onSendMessage={handleSendMessage}
           onClearChat={handleClearChat}
           isLoading={isLoading}
-          messages={clientConversation?.messages || []}
+          messages={messages}
         />
       </div>
     </div>

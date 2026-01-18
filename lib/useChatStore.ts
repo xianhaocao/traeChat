@@ -69,7 +69,6 @@ export const useChatStore = create<ChatStore>()(
         set((state) => ({
           conversations: [...state.conversations, newConversation],
           currentConversationId: id,
-          isSidebarOpen: false,
         }));
 
         return id;
@@ -78,7 +77,6 @@ export const useChatStore = create<ChatStore>()(
       switchConversation: (id) => {
         set(() => ({
           currentConversationId: id,
-          isSidebarOpen: false,
         }));
       },
 

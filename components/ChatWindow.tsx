@@ -10,9 +10,10 @@ import { formatDate } from '@/lib/utils';
 
 interface ChatWindowProps {
   messages: Message[];
+  isLoading?: boolean;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ messages, isLoading = false }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [clientMessages, setClientMessages] = useState(messages);
   
@@ -34,9 +35,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
     if (message.isStreaming && message.content === '') {
       return (
         <div className="typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span />
+          <span />
+          <span />
         </div>
       );
     }
@@ -155,6 +156,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
             )}
           </div>
         ))
+      )}
+
+      {/* 加载状态 */}
+      {isLoading && (
+        <div className="flex items-start gap-3 sm:gap-4 justify-start">
+          <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg">
+            🤖
+          </div>
+          <div className="max-w-[85%] sm:max-w-[80%] lg:max-w-[75%] rounded-lg p-3 sm:p-4 shadow bg-card text-foreground rounded-bl-none">
+            <div className="typing-indicator">
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* 滚动到底部的标记 */}

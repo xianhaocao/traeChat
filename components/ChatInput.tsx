@@ -146,28 +146,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onClearChat, isLoa
             <Send size={20} className="text-white" />
           </button>
         </div>
-
-        {/* 清空聊天按钮 */}
-        {messages.length > 0 && (
-          <button
-            onClick={handleClearChat}
-            disabled={isLoading}
-            className="self-end flex items-center gap-2 px-4 py-2 bg-card-hover text-foreground rounded-lg text-sm hover:bg-primary-light transition-colors shadow hover:shadow-md"
-          >
-            <Trash2 size={16} />
-            清空聊天
-          </button>
-        )}
       </div>
-
-      {/* 加载状态提示 */}
-      {isLoading && (
-        <div
-          className="mt-3 text-center text-sm text-muted-foreground"
-        >
-          AI正在思考中...
-        </div>
-      )}
     </div>
   );
 };
