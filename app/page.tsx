@@ -8,16 +8,20 @@ import Sidebar from '@/components/Sidebar';
 import ChatWindow from '@/components/ChatWindow';
 import ChatInput from '@/components/ChatInput';
 import { useChatStore } from '@/lib/useChatStore';
-import { Message } from '@/types';
+import { Message, Conversation } from '@/types';
 
 const Page: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { getCurrentConversation, addMessage, updateMessage, setMessageStreaming, clearConversation, createConversation } = useChatStore();
-  const currentConversation = getCurrentConversation();
+  const [clientConversation, setClientConversation] = useState<Conversation | undefined>(undefined);
+  
+  React.useEffect(() => {
+    setClientConversation(getCurrentConversation());
+  }, [getCurrentConversation]);
 
   const handleSendMessage = async (content: string) => {
-    if (!currentConversation) {
+    if (!clientConversation) {
       const newConversationId = createConversation();
       const newConversation = getCurrentConversation();
       if (!newConversation) return;
@@ -38,7 +42,7 @@ const Page: React.FC = () => {
         timestamp: new Date(),
         isStreaming: false,
       };
-      addMessage(currentConversation.id, userMessage);
+      addMessage(clientConversation.id, userMessage);
     }
 
     const updatedConversation = getCurrentConversation();
@@ -124,8 +128,8 @@ const Page: React.FC = () => {
   };
 
   const handleClearChat = () => {
-    if (currentConversation) {
-      clearConversation(currentConversation.id);
+    if (clientConversation) {
+      clearConversation(clientConversation.id);
     }
   };
 
@@ -148,7 +152,7 @@ const Page: React.FC = () => {
               <Menu size={22} />
             </Button>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {currentConversation?.title || 'TraeChat'}
+              {clientConversation?.title || 'TraeChat'}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -157,14 +161,14 @@ const Page: React.FC = () => {
         </header>
 
         {/* 聊天窗口 */}
-        <ChatWindow messages={currentConversation?.messages || []} />
+        <ChatWindow messages={clientConversation?.messages || []} />
 
         {/* 输入框 */}
         <ChatInput
           onSendMessage={handleSendMessage}
           onClearChat={handleClearChat}
           isLoading={isLoading}
-          messages={currentConversation?.messages || []}
+          messages={clientConversation?.messages || []}
         />
       </div>
     </div>

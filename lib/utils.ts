@@ -66,7 +66,7 @@ export const generateConversationTitle = (messages: any[]): string => {
   if (userMessage) {
     return truncateText(userMessage.content, 30);
   }
-  return `新对话 ${new Date().toLocaleTimeString()}`;
+  return `新对话`;
 };
 
 // 验证API密钥

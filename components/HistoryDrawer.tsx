@@ -8,6 +8,7 @@ import { Virtuoso } from 'react-virtuoso';
 import { useChatStore } from '@/lib/useChatStore';
 import { formatDate } from '@/lib/utils';
 import { Conversation, Message } from '@/types';
+import { useState, useEffect } from 'react';
 
 interface HistoryDrawerProps {
   isOpen: boolean;
@@ -16,6 +17,11 @@ interface HistoryDrawerProps {
 
 const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose }) => {
   const { conversations, currentConversationId, switchConversation, deleteConversation, clearAllConversations } = useChatStore();
+  const [clientConversations, setClientConversations] = useState(conversations);
+  
+  useEffect(() => {
+    setClientConversations(conversations);
+  }, [conversations]);
 
   const handleClearAll = () => {
     if (confirm('确定要清除所有对话记录吗？此操作不可撤销。')) {
@@ -65,41 +71,41 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ isOpen, onClose }) => {
                 </div>
               ) : (
                 <Virtuoso
-                  data={conversations}
-                  itemContent={(index: number, conversation: Conversation) => (
-                    <div
-                      key={conversation.id}
-                      className={`cursor-pointer p-3 rounded-lg transition-colors ${currentConversationId === conversation.id ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                      onClick={() => {
-                        switchConversation(conversation.id);
-                        onClose();
-                      }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{conversation.title}</h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{conversation.messages.length > 0 ? conversation.messages[conversation.messages.length - 1].content : '无消息'}</p>
+                    data={clientConversations}
+                    itemContent={(index: number, conversation: Conversation) => (
+                      <div
+                        key={conversation.id}
+                        className={`cursor-pointer p-3 rounded-lg transition-colors ${currentConversationId === conversation.id ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                        onClick={() => {
+                          switchConversation(conversation.id);
+                          onClose();
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{conversation.title}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{conversation.messages.length > 0 ? conversation.messages[conversation.messages.length - 1].content : '无消息'}</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteConversation(conversation.id);
+                            }}
+                            className="ml-2 text-gray-400 hover:text-red-500"
+                          >
+                            <Trash2 size={16} />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteConversation(conversation.id);
-                          }}
-                          className="ml-2 text-gray-400 hover:text-red-500"
-                        >
-                          <Trash2 size={16} />
-                        </Button>
+                        <div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                          <span>{formatDate(conversation.updatedAt)}</span>
+                          <span>{getWordCount(conversation.messages)} 字</span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{formatDate(conversation.updatedAt)}</span>
-                        <span>{getWordCount(conversation.messages)} 字</span>
-                      </div>
-                    </div>
-                  )}
-                  style={{ height: '100%' }}
-                />
+                    )}
+                    style={{ height: '100%' }}
+                  />
               )}
             </div>
 

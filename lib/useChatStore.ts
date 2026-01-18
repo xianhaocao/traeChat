@@ -56,12 +56,13 @@ export const useChatStore = create<ChatStore>()(
 
       createConversation: (model = get().config.defaultModel) => {
         const id = generateId();
+        const now = new Date();
         const newConversation: Conversation = {
           id,
-          title: `新对话 ${new Date().toLocaleTimeString()}`,
+          title: `新对话`,
           messages: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: now,
+          updatedAt: now,
           model,
         };
 

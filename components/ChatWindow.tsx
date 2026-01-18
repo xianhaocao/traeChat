@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -14,6 +14,11 @@ interface ChatWindowProps {
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [clientMessages, setClientMessages] = useState(messages);
+  
+  useEffect(() => {
+    setClientMessages(messages);
+  }, [messages]);
 
   // 滚动到底部
   const scrollToBottom = () => {
@@ -99,7 +104,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
 
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
-      {messages.length === 0 ? (
+      {clientMessages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
           <div className="mb-4">
             <div className="text-6xl">🤖</div>
@@ -115,7 +120,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages }) => {
           </div>
         </div>
       ) : (
-        messages.map((message, index) => (
+        clientMessages.map((message, index) => (
           <div
             key={message.id}
             className={`flex items-start gap-3 sm:gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
