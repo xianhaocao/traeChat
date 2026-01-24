@@ -8,7 +8,7 @@ import Sidebar from '@/components/Sidebar';
 import ChatWindow from '@/components/ChatWindow';
 import ChatInput from '@/components/ChatInput';
 import { useChatStore } from '@/lib/useChatStore';
-import { Message, Conversation } from '@/types';
+import { Message, Conversation, FileAttachment } from '@/types';
 
 const Page: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -25,7 +25,7 @@ const Page: React.FC = () => {
     setMessages(getCurrentMessages());
   }, [getCurrentMessages, currentConversationId, conversations]);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, files?: FileAttachment[]) => {
     if (!clientConversation) {
       const newConversationId = createConversation();
       const newConversation = getCurrentConversation();
@@ -37,6 +37,7 @@ const Page: React.FC = () => {
         content,
         timestamp: new Date(),
         isStreaming: false,
+        files,
       };
       addMessage(newConversationId, userMessage);
       setMessages([...messages, userMessage]);
@@ -47,6 +48,7 @@ const Page: React.FC = () => {
         content,
         timestamp: new Date(),
         isStreaming: false,
+        files,
       };
       addMessage(clientConversation.id, userMessage);
       setMessages([...messages, userMessage]);

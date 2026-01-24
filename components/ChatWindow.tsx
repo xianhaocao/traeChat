@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Message } from '@/types';
+import { Message, FileAttachment } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { FileText, Image as ImageIcon } from 'lucide-react';
 
 interface ChatWindowProps {
   messages: Message[];
@@ -30,6 +31,41 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages, isLoading = false }) 
     scrollToBottom();
   }, [messages]);
 
+  // 渲染文件附件
+  const renderFileAttachments = (files?: FileAttachment[]) => {
+    if (!files || files.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="space-y-2 mb-3">
+        {files.map((file) => (
+          <div key={file.id} className="flex items-center gap-2">
+            {file.type.startsWith('image/') ? (
+              <div className="w-full max-w-[300px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                <img 
+                  src={file.url} 
+                  alt={file.name} 
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            ) : (
+              <a 
+                href={file.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg w-full max-w-[300px] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                <FileText size={16} className="text-gray-500" />
+                <span className="text-sm truncate">{file.name}</span>
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // 渲染消息内容
   const renderMessageContent = (message: Message) => {
     if (message.isStreaming && message.content === '') {
@@ -43,63 +79,68 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages, isLoading = false }) 
     }
 
     return (
-      <ReactMarkdown
-        className="prose prose-sm sm:prose-base max-w-none break-words"
-        components={{
-          code({ node, inline, className, children, ...props }) {
-            const match = /language-([\w]+)/.exec(className || '');
-            return !inline && match ? (
-              <SyntaxHighlighter
-                style={tomorrow}
-                language={match[1]}
-                PreTag="div"
-                className="rounded-lg overflow-x-auto my-2"
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code
-                className={`${className} bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono`}
-                {...props}
-              >
+      <>
+        {/* 文件附件显示在内容上方 */}
+        {renderFileAttachments(message.files)}
+        
+        <ReactMarkdown
+          className="prose prose-sm sm:prose-base max-w-none break-words"
+          components={{
+            code({ node, inline, className, children, ...props }) {
+              const match = /language-([\w]+)/.exec(className || '');
+              return !inline && match ? (
+                <SyntaxHighlighter
+                  style={tomorrow}
+                  language={match[1]}
+                  PreTag="div"
+                  className="rounded-lg overflow-x-auto my-2"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              ) : (
+                <code
+                  className={`${className} bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono`}
+                  {...props}
+                >
+                  {children}
+                </code>
+              );
+            },
+            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+            ul: ({ children }) => <ul className="list-disc pl-6 mb-2">{children}</ul>,
+            ol: ({ children }) => <ol className="list-decimal pl-6 mb-2">{children}</ol>,
+            li: ({ children }) => <li className="mb-1">{children}</li>,
+            h1: ({ children }) => <h1 className="text-2xl font-bold mb-2 mt-4">{children}</h1>,
+            h2: ({ children }) => <h2 className="text-xl font-bold mb-2 mt-4">{children}</h2>,
+            h3: ({ children }) => <h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>,
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-2">
                 {children}
-              </code>
-            );
-          },
-          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-          ul: ({ children }) => <ul className="list-disc pl-6 mb-2">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal pl-6 mb-2">{children}</ol>,
-          li: ({ children }) => <li className="mb-1">{children}</li>,
-          h1: ({ children }) => <h1 className="text-2xl font-bold mb-2 mt-4">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-xl font-bold mb-2 mt-4">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>,
-          blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-2">
-              {children}
-            </blockquote>
-          ),
-          table: ({ children }) => (
-            <div className="overflow-x-auto my-2">
-              <table className="border-collapse border border-gray-300 dark:border-gray-600">
+              </blockquote>
+            ),
+            table: ({ children }) => (
+              <div className="overflow-x-auto my-2">
+                <table className="border-collapse border border-gray-300 dark:border-gray-600">
+                  {children}
+                </table>
+              </div>
+            ),
+            th: ({ children }) => (
+              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-bold">
                 {children}
-              </table>
-            </div>
-          ),
-          th: ({ children }) => (
-            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-bold">
-              {children}
-            </th>
-          ),
-          td: ({ children }) => (
-            <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-              {children}
-            </td>
-          ),
-        }}
-      >
-        {message.content}
-      </ReactMarkdown>
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                {children}
+              </td>
+            ),
+          }}
+        >
+          {message.content}
+        </ReactMarkdown>
+      </>
     );
   };
 
