@@ -3,12 +3,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
-import { Send, Smile, Trash2, Paperclip } from 'lucide-react';
-import { Message } from '@/types';
+import { Send, Smile, Trash2, Paperclip, FileText, Image as ImageIcon, X } from 'lucide-react';
+import { Message, FileAttachment } from '@/types';
 import { debounce } from '@/lib/utils';
 
 interface ChatInputProps {
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, files?: FileAttachment[]) => void;
   onClearChat: () => void;
   isLoading: boolean;
   messages: Message[];
@@ -19,7 +19,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onClearChat, isLoa
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [files, setFiles] = useState<FileAttachment[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 智能建议
   const generateSuggestions = debounce(() => {
@@ -41,11 +43,40 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onClearChat, isLoa
     generateSuggestions();
   }, [inputValue, messages.length, generateSuggestions]);
 
+  // 处理文件选择
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
+    if (selectedFiles) {
+      const newFiles: FileAttachment[] = Array.from(selectedFiles).map(file => {
+        // 生成临时URL用于预览
+        const url = URL.createObjectURL(file);
+        return {
+          id: crypto.randomUUID(),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          url
+        };
+      });
+      setFiles([...files, ...newFiles]);
+    }
+  };
+
+  // 移除文件
+  const handleRemoveFile = (fileId: string) => {
+    const fileToRemove = files.find(f => f.id === fileId);
+    if (fileToRemove) {
+      URL.revokeObjectURL(fileToRemove.url);
+    }
+    setFiles(files.filter(file => file.id !== fileId));
+  };
+
   // 发送消息
   const handleSendMessage = () => {
-    if (inputValue.trim() && !isLoading) {
-      onSendMessage(inputValue.trim());
+    if ((inputValue.trim() || files.length > 0) && !isLoading) {
+      onSendMessage(inputValue.trim(), files);
       setInputValue('');
+      setFiles([]);
       setShowSuggestions(false);
       textareaRef.current?.focus();
     }
@@ -94,6 +125,29 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onClearChat, isLoa
         </div>
       )}
 
+      {/* 文件列表 */}
+      {files.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {files.map(file => (
+            <div key={file.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card-hover border border-border">
+              {file.type.startsWith('image/') ? (
+                <ImageIcon size={16} className="text-primary" />
+              ) : (
+                <FileText size={16} className="text-gray-500" />
+              )}
+              <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+              <button
+                onClick={() => handleRemoveFile(file.id)}
+                className="p-1 rounded-full hover:bg-red-100 text-red-500 transition-colors"
+                title="移除文件"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* 输入框容器 */}
       <div className="flex flex-col gap-3">
         <div className="flex items-end gap-2">
@@ -102,9 +156,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onClearChat, isLoa
             className="p-2 rounded-full bg-card-hover hover:bg-primary-light transition-colors text-foreground"
             disabled={isLoading}
             title="附件"
+            onClick={() => fileInputRef.current?.click()}
           >
             <Paperclip size={20} />
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+            disabled={isLoading}
+          />
 
           {/* 表情按钮 */}
           <button

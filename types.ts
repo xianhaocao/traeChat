@@ -1,3 +1,12 @@
+// 定义文件类型
+export interface FileAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
+
 // 定义消息类型
 export interface Message {
   id: string;
@@ -5,6 +14,7 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   timestamp: Date;
   isStreaming?: boolean;
+  files?: FileAttachment[];
 }
 
 // 定义对话类型
